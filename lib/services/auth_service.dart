@@ -17,4 +17,19 @@ class AuthService {
       throw e.message ?? 'Registration failed';
     }
   }
+
+  Future<User?> signInWithEmailAndPassword(
+    String email,
+    String password,
+  ) async {
+    try {
+      UserCredential result = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      return result.user;
+    } on FirebaseAuthException catch (e) {
+      throw e.message ?? 'Login failed';
+    }
+  }
 }
