@@ -32,4 +32,8 @@ class AuthService {
       throw e.message ?? 'Login failed';
     }
   }
+
+  Future<void> signOut() async {
+    await _auth.signOut();
+  }
 }
