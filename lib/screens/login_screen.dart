@@ -28,9 +28,8 @@ class _LoginScreenState extends State<LoginScreen> {
         _passwordController.text.trim(),
       );
 
-      // NAVIGACIJA NA HOME SCREEN
-      if (!mounted) return;
-      Navigator.pushReplacementNamed(context, '/home');
+      // ❗ NEMA NAVIGACIJE OVDE
+      // AuthGate će AUTOMATSKI prebaciti na HomeScreen
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();
@@ -51,25 +50,50 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             TextField(
               controller: _emailController,
               decoration: const InputDecoration(labelText: 'Email'),
             ),
+            const SizedBox(height: 10),
             TextField(
               controller: _passwordController,
               decoration: const InputDecoration(labelText: 'Password'),
               obscureText: true,
             ),
             const SizedBox(height: 20),
+
             if (_errorMessage.isNotEmpty)
-              Text(_errorMessage, style: const TextStyle(color: Colors.red)),
+              Text(
+                _errorMessage,
+                style: const TextStyle(color: Colors.red),
+                textAlign: TextAlign.center,
+              ),
+
             const SizedBox(height: 10),
+
             ElevatedButton(
               onPressed: _isLoading ? null : _login,
               child: _isLoading
-                  ? const CircularProgressIndicator(color: Colors.white)
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
                   : const Text('Login'),
+            ),
+
+            const SizedBox(height: 12),
+
+            TextButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/register');
+              },
+              child: const Text("Don't have an account? Register"),
             ),
           ],
         ),
