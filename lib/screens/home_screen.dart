@@ -23,12 +23,20 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: const Center(
-        child: Text(
-          'Welcome! 🎉\nExpenses coming next...',
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 20),
+      body: Center(
+        child: ElevatedButton(
+          child: const Text('View Expenses'),
+          onPressed: () {
+            Navigator.pushNamed(context, '/expenses');
+          },
         ),
+      ),
+
+      floatingActionButton: FloatingActionButton(
+        child: const Icon(Icons.add),
+        onPressed: () {
+          Navigator.pushNamed(context, '/add-expense');
+        },
       ),
     );
   }

@@ -7,6 +7,8 @@ import 'screens/register_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/home_screen.dart';
+import 'screens/add_expense_screen.dart';
+import 'screens/expenses_list_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,6 +29,8 @@ class ExpenseTrackerApp extends StatelessWidget {
         '/login': (context) => const LoginScreen(),
         '/register': (context) => const RegisterScreen(),
         '/home': (context) => const HomeScreen(),
+        '/add-expense': (context) => AddExpenseScreen(),
+        '/expenses': (context) => ExpensesListScreen(),
       },
     );
   }
