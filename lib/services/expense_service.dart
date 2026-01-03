@@ -3,24 +3,33 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../models/expense.dart';
 
 class ExpenseService {
-  final _db = FirebaseFirestore.instance;
-  final _auth = FirebaseAuth.instance;
-
-  String get _userId => _auth.currentUser!.uid;
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   Future<void> addExpense(double amount, String category, DateTime date) async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
     await _db.collection('expenses').add({
-      'userId': _userId,
+      'userId': user.uid,
       'amount': amount,
       'category': category,
-      'date': date,
+      'date': Timestamp.fromDate(date),
+      'createdAt': FieldValue.serverTimestamp(),
     });
   }
 
   Stream<List<Expense>> getExpenses() {
+    final user = _auth.currentUser;
+
+    if (user == null) {
+      // dok se auth ne inicijalizuje
+      return const Stream.empty();
+    }
+
     return _db
         .collection('expenses')
-        .where('userId', isEqualTo: _userId)
+        .where('userId', isEqualTo: user.uid)
         .orderBy('date', descending: true)
         .snapshots()
         .map(
