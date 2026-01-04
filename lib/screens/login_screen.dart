@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -28,11 +29,25 @@ class _LoginScreenState extends State<LoginScreen> {
         _passwordController.text.trim(),
       );
 
-      // ❗ NEMA NAVIGACIJE OVDE
-      // AuthGate će AUTOMATSKI prebaciti na HomeScreen
-    } catch (e) {
+      //
+      //  AuthGate automatski vodi na Home
+    } on FirebaseAuthException catch (e) {
+      String message = 'Došlo je do greške.';
+
+      switch (e.code) {
+        case 'user-not-found':
+          message = 'Korisnik ne postoji.';
+          break;
+        case 'wrong-password':
+          message = 'Pogrešna lozinka.';
+          break;
+        case 'invalid-email':
+          message = 'Email nije validan.';
+          break;
+      }
+
       setState(() {
-        _errorMessage = e.toString();
+        _errorMessage = message;
       });
     } finally {
       if (mounted) {

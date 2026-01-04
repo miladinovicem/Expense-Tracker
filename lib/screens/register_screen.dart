@@ -28,7 +28,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
 
     try {
-      final user = await _authService.registerWithEmailAndPassword(
+      await _authService.registerWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
         firstName: _firstNameController.text.trim(),
@@ -36,11 +36,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         phone: _phoneController.text.trim(),
       );
 
-      if (!mounted) return;
-
-      if (user.uid.isNotEmpty) {
-        Navigator.pushReplacementNamed(context, '/home');
-      }
+      //
+      //  AuthGate će AUTOMATSKI prebaciti korisnika na Home
     } on FirebaseAuthException catch (e) {
       String message = 'Došlo je do greške.';
 
