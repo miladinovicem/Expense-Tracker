@@ -18,12 +18,10 @@ class AuthGate extends StatelessWidget {
           );
         }
 
-        // ako je ulogovan
         if (snapshot.hasData) {
           return const HomeScreen();
         }
 
-        // ako NIJE ulogovan ; izbor Login / Register
         return const WelcomeScreen();
       },
     );

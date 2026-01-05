@@ -20,7 +20,7 @@ class WelcomeScreen extends StatelessWidget {
 
               ElevatedButton(
                 onPressed: () {
-                  Navigator.pushNamed(context, '/login');
+                  Navigator.pushNamed(context, '/login'); // ✅
                 },
                 child: const Text('Login'),
               ),
@@ -29,7 +29,7 @@ class WelcomeScreen extends StatelessWidget {
 
               OutlinedButton(
                 onPressed: () {
-                  Navigator.pushNamed(context, '/register');
+                  Navigator.pushNamed(context, '/register'); // ✅
                 },
                 child: const Text('Register'),
               ),

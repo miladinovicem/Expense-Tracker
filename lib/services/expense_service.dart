@@ -6,7 +6,12 @@ class ExpenseService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  Future<void> addExpense(double amount, String category, DateTime date) async {
+  // CREATE
+  Future<void> addExpense({
+    required double amount,
+    required String category,
+    required DateTime date,
+  }) async {
     final user = _auth.currentUser;
     if (user == null) return;
 
@@ -19,26 +24,38 @@ class ExpenseService {
     });
   }
 
+  // UPDATE
+  Future<void> updateExpense({
+    required String id,
+    required double amount,
+    required String category,
+    required DateTime date,
+  }) async {
+    await _db.collection('expenses').doc(id).update({
+      'amount': amount,
+      'category': category,
+      'date': Timestamp.fromDate(date),
+    });
+  }
+
+  // READ
   Stream<List<Expense>> getExpenses() {
     final user = _auth.currentUser;
-
-    if (user == null) {
-      // dok se auth ne inicijalizuje
-      return const Stream.empty();
-    }
+    if (user == null) return const Stream.empty();
 
     return _db
         .collection('expenses')
         .where('userId', isEqualTo: user.uid)
         .orderBy('date', descending: true)
         .snapshots()
-        .map(
-          (snapshot) => snapshot.docs
+        .map((snapshot) {
+          return snapshot.docs
               .map((doc) => Expense.fromMap(doc.id, doc.data()))
-              .toList(),
-        );
+              .toList();
+        });
   }
 
+  // DELETE
   Future<void> deleteExpense(String id) async {
     await _db.collection('expenses').doc(id).delete();
   }

@@ -36,21 +36,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
         phone: _phoneController.text.trim(),
       );
 
-      //
-      //  AuthGate će AUTOMATSKI prebaciti korisnika na Home
+      if (!mounted) return;
+
+      // 🔥 KLJUČNO — zatvaramo RegisterScreen
+      Navigator.pop(context);
     } on FirebaseAuthException catch (e) {
       String message = 'Došlo je do greške.';
 
-      switch (e.code) {
-        case 'email-already-in-use':
-          message = 'Email već postoji.';
-          break;
-        case 'weak-password':
-          message = 'Lozinka mora imati bar 6 karaktera.';
-          break;
-        case 'invalid-email':
-          message = 'Email nije validan.';
-          break;
+      if (e.code == 'email-already-in-use') {
+        message = 'Email već postoji.';
+      } else if (e.code == 'weak-password') {
+        message = 'Lozinka mora imati bar 6 karaktera.';
+      } else if (e.code == 'invalid-email') {
+        message = 'Email nije validan.';
       }
 
       setState(() {
@@ -116,7 +114,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ElevatedButton(
               onPressed: _isLoading ? null : _register,
               child: _isLoading
-                  ? const CircularProgressIndicator(color: Colors.white)
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
                   : const Text('Register'),
             ),
           ],

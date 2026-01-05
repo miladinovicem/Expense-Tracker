@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import '../services/auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 import '../services/expense_service.dart';
 import '../models/expense.dart';
+import 'edit_expense_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -11,9 +13,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final AuthService _authService = AuthService();
   final ExpenseService _expenseService = ExpenseService();
-
   late final Stream<List<Expense>> _expensesStream;
 
   @override
@@ -31,15 +31,11 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
-              await _authService.signOut();
-              if (mounted) {
-                Navigator.pushReplacementNamed(context, '/login');
-              }
+              await FirebaseAuth.instance.signOut();
             },
           ),
         ],
       ),
-
       body: StreamBuilder<List<Expense>>(
         stream: _expensesStream,
         builder: (context, snapshot) {
@@ -68,6 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
             itemCount: expenses.length,
             itemBuilder: (context, index) {
               final expense = expenses[index];
+
               return ListTile(
                 title: Text(expense.category),
                 subtitle: Text(expense.date.toLocal().toString().split(' ')[0]),
@@ -75,17 +72,24 @@ class _HomeScreenState extends State<HomeScreen> {
                   expense.amount.toStringAsFixed(2),
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => EditExpenseScreen(expense: expense),
+                    ),
+                  );
+                },
               );
             },
           );
         },
       ),
-
       floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.add),
         onPressed: () {
           Navigator.pushNamed(context, '/add-expense');
         },
+        child: const Icon(Icons.add),
       ),
     );
   }

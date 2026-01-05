@@ -29,21 +29,19 @@ class _LoginScreenState extends State<LoginScreen> {
         _passwordController.text.trim(),
       );
 
-      //
-      //  AuthGate automatski vodi na Home
-    } on FirebaseAuthException catch (e) {
-      String message = 'Došlo je do greške.';
+      if (!mounted) return;
 
-      switch (e.code) {
-        case 'user-not-found':
-          message = 'Korisnik ne postoji.';
-          break;
-        case 'wrong-password':
-          message = 'Pogrešna lozinka.';
-          break;
-        case 'invalid-email':
-          message = 'Email nije validan.';
-          break;
+      // 🔥 KLJUČNO: uklanjamo LoginScreen
+      Navigator.pop(context);
+    } on FirebaseAuthException catch (e) {
+      String message = 'Greška pri prijavi.';
+
+      if (e.code == 'user-not-found') {
+        message = 'Korisnik ne postoji.';
+      } else if (e.code == 'wrong-password') {
+        message = 'Pogrešna lozinka.';
+      } else if (e.code == 'invalid-email') {
+        message = 'Email nije validan.';
       }
 
       setState(() {
@@ -51,9 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
       });
     } finally {
       if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
+        setState(() => _isLoading = false);
       }
     }
   }
@@ -92,23 +88,14 @@ class _LoginScreenState extends State<LoginScreen> {
               onPressed: _isLoading ? null : _login,
               child: _isLoading
                   ? const SizedBox(
-                      height: 20,
                       width: 20,
+                      height: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
                         color: Colors.white,
                       ),
                     )
                   : const Text('Login'),
-            ),
-
-            const SizedBox(height: 12),
-
-            TextButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/register');
-              },
-              child: const Text("Don't have an account? Register"),
             ),
           ],
         ),

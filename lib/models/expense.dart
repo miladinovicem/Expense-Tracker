@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Expense {
   final String id;
   final String userId;
@@ -18,7 +20,7 @@ class Expense {
       'userId': userId,
       'amount': amount,
       'category': category,
-      'date': date,
+      'date': Timestamp.fromDate(date),
     };
   }
 
@@ -26,9 +28,9 @@ class Expense {
     return Expense(
       id: id,
       userId: map['userId'],
-      amount: map['amount'],
+      amount: (map['amount'] as num).toDouble(),
       category: map['category'],
-      date: map['date'].toDate(),
+      date: (map['date'] as Timestamp).toDate(),
     );
   }
 }
