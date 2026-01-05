@@ -32,10 +32,12 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: const Icon(Icons.logout),
             onPressed: () async {
               await FirebaseAuth.instance.signOut();
+              // AuthGate automatski vodi na Welcome
             },
           ),
         ],
       ),
+
       body: StreamBuilder<List<Expense>>(
         stream: _expensesStream,
         builder: (context, snapshot) {
@@ -65,26 +67,47 @@ class _HomeScreenState extends State<HomeScreen> {
             itemBuilder: (context, index) {
               final expense = expenses[index];
 
-              return ListTile(
-                title: Text(expense.category),
-                subtitle: Text(expense.date.toLocal().toString().split(' ')[0]),
-                trailing: Text(
-                  expense.amount.toStringAsFixed(2),
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+              return Dismissible(
+                key: Key(expense.id),
+                direction: DismissDirection.endToStart,
+                background: Container(
+                  color: Colors.red,
+                  alignment: Alignment.centerRight,
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: const Icon(Icons.delete, color: Colors.white),
                 ),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => EditExpenseScreen(expense: expense),
-                    ),
+                onDismissed: (_) async {
+                  await _expenseService.deleteExpense(expense.id);
+
+                  if (!mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Expense deleted')),
                   );
                 },
+                child: ListTile(
+                  title: Text(expense.category),
+                  subtitle: Text(
+                    expense.date.toLocal().toString().split(' ')[0],
+                  ),
+                  trailing: Text(
+                    expense.amount.toStringAsFixed(2),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => EditExpenseScreen(expense: expense),
+                      ),
+                    );
+                  },
+                ),
               );
             },
           );
         },
       ),
+
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.pushNamed(context, '/add-expense');
