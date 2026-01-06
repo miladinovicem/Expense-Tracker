@@ -28,17 +28,13 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     final amountText = _amountController.text.trim();
 
     if (amountText.isEmpty) {
-      setState(() {
-        _error = 'Amount is required';
-      });
+      setState(() => _error = 'Amount is required');
       return;
     }
 
     final amount = double.tryParse(amountText);
     if (amount == null) {
-      setState(() {
-        _error = 'Invalid amount';
-      });
+      setState(() => _error = 'Invalid amount');
       return;
     }
 
@@ -49,13 +45,13 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
 
     try {
       await _expenseService.addExpense(
-        amount,
-        _selectedCategory,
-        DateTime.now(),
+        amount: amount,
+        category: _selectedCategory,
+        date: DateTime.now(), // ✅ privremeno
       );
 
       if (!mounted) return;
-      Navigator.pop(context); // vraća se na Home
+      Navigator.pop(context);
     } catch (e) {
       setState(() {
         _error = e.toString();
@@ -81,8 +77,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               decoration: const InputDecoration(labelText: 'Amount'),
             ),
             const SizedBox(height: 16),
+
             DropdownButtonFormField<String>(
-              initialValue: _selectedCategory,
+              value: _selectedCategory,
               items: _categories
                   .map((c) => DropdownMenuItem(value: c, child: Text(c)))
                   .toList(),
@@ -93,10 +90,14 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               },
               decoration: const InputDecoration(labelText: 'Category'),
             ),
+
             const SizedBox(height: 20),
+
             if (_error.isNotEmpty)
               Text(_error, style: const TextStyle(color: Colors.red)),
+
             const SizedBox(height: 10),
+
             ElevatedButton(
               onPressed: _isLoading ? null : _saveExpense,
               child: _isLoading

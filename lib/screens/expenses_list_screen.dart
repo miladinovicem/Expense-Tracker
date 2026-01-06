@@ -1,11 +1,33 @@
 import 'package:flutter/material.dart';
 import '../services/expense_service.dart';
 import '../models/expense.dart';
+import 'edit_expense_screen.dart';
 
 class ExpensesListScreen extends StatelessWidget {
   ExpensesListScreen({super.key});
 
   final ExpenseService _expenseService = ExpenseService();
+
+  Future<bool?> _confirmDelete(BuildContext context) {
+    return showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete expense'),
+        content: const Text('Are you sure you want to delete this expense?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,8 +40,17 @@ class ExpensesListScreen extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
 
+          if (snapshot.hasError) {
+            return Center(
+              child: Text(
+                'Error: ${snapshot.error}',
+                style: const TextStyle(color: Colors.red),
+              ),
+            );
+          }
+
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No expenses yet'));
+            return const Center(child: Text('No expenses yet 💸'));
           }
 
           final expenses = snapshot.data!;
@@ -38,10 +69,31 @@ class ExpensesListScreen extends StatelessWidget {
                   subtitle: Text(
                     expense.date.toLocal().toString().split(' ')[0],
                   ),
+
+                  /// ✏️ EDIT NA TAP
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => EditExpenseScreen(expense: expense),
+                      ),
+                    );
+                  },
+
+                  /// 🗑 DELETE
                   trailing: IconButton(
                     icon: const Icon(Icons.delete, color: Colors.red),
                     onPressed: () async {
-                      await _expenseService.deleteExpense(expense.id);
+                      final confirmed = await _confirmDelete(context);
+                      if (confirmed == true) {
+                        await _expenseService.deleteExpense(expense.id);
+
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Expense deleted')),
+                          );
+                        }
+                      }
                     },
                   ),
                 ),

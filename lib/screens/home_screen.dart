@@ -1,26 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import '../services/expense_service.dart';
-import '../models/expense.dart';
-import 'edit_expense_screen.dart';
-
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
-
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  final ExpenseService _expenseService = ExpenseService();
-  late final Stream<List<Expense>> _expensesStream;
-
-  @override
-  void initState() {
-    super.initState();
-    _expensesStream = _expenseService.getExpenses();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,87 +14,54 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: const Icon(Icons.logout),
             onPressed: () async {
               await FirebaseAuth.instance.signOut();
-              // AuthGate automatski vodi na Welcome
             },
           ),
         ],
       ),
 
-      body: StreamBuilder<List<Expense>>(
-        stream: _expensesStream,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (snapshot.hasError) {
-            return Center(
-              child: Text(
-                'Error: ${snapshot.error}',
-                style: const TextStyle(color: Colors.red),
+      body: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton.icon(
+              icon: const Icon(Icons.list),
+              label: const Text('View expenses'),
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 48),
               ),
-            );
-          }
+              onPressed: () {
+                Navigator.pushNamed(context, '/expenses');
+              },
+            ),
 
-          final expenses = snapshot.data ?? [];
+            const SizedBox(height: 16),
 
-          if (expenses.isEmpty) {
-            return const Center(
-              child: Text('No expenses yet 💸', style: TextStyle(fontSize: 18)),
-            );
-          }
+            ElevatedButton.icon(
+              icon: const Icon(Icons.add),
+              label: const Text('Add expense'),
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 48),
+              ),
+              onPressed: () {
+                Navigator.pushNamed(context, '/add-expense');
+              },
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/incomes');
+              },
+              child: const Text('View incomes'),
+            ),
 
-          return ListView.builder(
-            itemCount: expenses.length,
-            itemBuilder: (context, index) {
-              final expense = expenses[index];
-
-              return Dismissible(
-                key: Key(expense.id),
-                direction: DismissDirection.endToStart,
-                background: Container(
-                  color: Colors.red,
-                  alignment: Alignment.centerRight,
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: const Icon(Icons.delete, color: Colors.white),
-                ),
-                onDismissed: (_) async {
-                  await _expenseService.deleteExpense(expense.id);
-
-                  if (!mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Expense deleted')),
-                  );
-                },
-                child: ListTile(
-                  title: Text(expense.category),
-                  subtitle: Text(
-                    expense.date.toLocal().toString().split(' ')[0],
-                  ),
-                  trailing: Text(
-                    expense.amount.toStringAsFixed(2),
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => EditExpenseScreen(expense: expense),
-                      ),
-                    );
-                  },
-                ),
-              );
-            },
-          );
-        },
-      ),
-
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pushNamed(context, '/add-expense');
-        },
-        child: const Icon(Icons.add),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/add-income');
+              },
+              child: const Text('Add income'),
+            ),
+          ],
+        ),
       ),
     );
   }
