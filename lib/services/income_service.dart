@@ -45,4 +45,18 @@ class IncomeService {
   Future<void> deleteIncome(String id) async {
     await _db.collection('incomes').doc(id).delete();
   }
+
+  Future<void> updateIncome({
+    required String id,
+    required double amount,
+    required String source,
+    required DateTime date,
+  }) async {
+    await _db.collection('incomes').doc(id).update({
+      'amount': amount,
+      'source': source,
+      'date': Timestamp.fromDate(DateTime(date.year, date.month, date.day, 12)),
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  }
 }

@@ -63,14 +63,46 @@ class ExpensesListScreen extends StatelessWidget {
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 child: ListTile(
+                  /// 📌 CATEGORY
                   title: Text(
-                    '${expense.category} - ${expense.amount.toStringAsFixed(2)}',
+                    expense.category,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
+
+                  /// 📅 DATE
                   subtitle: Text(
                     expense.date.toLocal().toString().split(' ')[0],
                   ),
 
-                  /// ✏️ EDIT NA TAP
+                  /// 💰 AMOUNT + DELETE
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '${expense.amount.toStringAsFixed(2)} RSD',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.redAccent),
+                        onPressed: () async {
+                          final confirmed = await _confirmDelete(context);
+                          if (confirmed == true) {
+                            await _expenseService.deleteExpense(expense.id);
+
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Expense deleted'),
+                                ),
+                              );
+                            }
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+
+                  /// ✏️ EDIT ON TAP
                   onTap: () {
                     Navigator.push(
                       context,
@@ -79,23 +111,6 @@ class ExpensesListScreen extends StatelessWidget {
                       ),
                     );
                   },
-
-                  /// 🗑 DELETE
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete, color: Colors.red),
-                    onPressed: () async {
-                      final confirmed = await _confirmDelete(context);
-                      if (confirmed == true) {
-                        await _expenseService.deleteExpense(expense.id);
-
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Expense deleted')),
-                          );
-                        }
-                      }
-                    },
-                  ),
                 ),
               );
             },

@@ -19,17 +19,29 @@ class WelcomeScreen extends StatelessWidget {
               const SizedBox(height: 40),
 
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(180, 48),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                ),
                 onPressed: () {
-                  Navigator.pushNamed(context, '/login'); // ✅
+                  Navigator.pushNamed(context, '/login');
                 },
                 child: const Text('Login'),
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
 
-              OutlinedButton(
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(180, 48),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                ),
                 onPressed: () {
-                  Navigator.pushNamed(context, '/register'); // ✅
+                  Navigator.pushNamed(context, '/register');
                 },
                 child: const Text('Register'),
               ),
