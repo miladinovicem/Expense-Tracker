@@ -7,6 +7,27 @@ class IncomesListScreen extends StatelessWidget {
 
   final IncomeService _incomeService = IncomeService();
 
+  Future<bool?> _confirmDelete(BuildContext context) {
+    return showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete income'),
+        content: const Text('Are you sure you want to delete this income?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -19,7 +40,7 @@ class IncomesListScreen extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
 
-          //  error
+          // ❌ error
           if (snapshot.hasError) {
             return Center(
               child: Text(
@@ -41,60 +62,27 @@ class IncomesListScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               final income = incomes[index];
 
-              return Dismissible(
-                key: Key(income.id),
-                direction: DismissDirection.endToStart,
-
-                ///  CONFIRM DELETE
-                confirmDismiss: (_) async {
-                  return await showDialog<bool>(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: const Text('Delete income'),
-                      content: const Text(
-                        'Are you sure you want to delete this income?',
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context, false),
-                          child: const Text('Cancel'),
-                        ),
-                        TextButton(
-                          onPressed: () => Navigator.pop(context, true),
-                          style: TextButton.styleFrom(
-                            foregroundColor: Colors.red,
-                          ),
-                          child: const Text('Delete'),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-
-                /// DELETE
-                onDismissed: (_) async {
-                  await _incomeService.deleteIncome(income.id);
-
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Income deleted')),
-                  );
-                },
-
-                background: Container(
-                  color: Colors.red,
-                  alignment: Alignment.centerRight,
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: const Icon(Icons.delete, color: Colors.white),
-                ),
-
+              return Card(
+                margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 child: ListTile(
                   title: Text(income.source),
                   subtitle: Text(
                     income.date.toLocal().toString().split(' ')[0],
                   ),
-                  trailing: Text(
-                    income.amount.toStringAsFixed(2),
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.red),
+                    onPressed: () async {
+                      final confirmed = await _confirmDelete(context);
+                      if (confirmed == true) {
+                        await _incomeService.deleteIncome(income.id);
+
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Income deleted')),
+                          );
+                        }
+                      }
+                    },
                   ),
                 ),
               );

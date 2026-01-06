@@ -41,7 +41,7 @@ class IncomeService {
         );
   }
 
-  // DELETE (kasnije EDIT ako želiš)
+  // DELETE
   Future<void> deleteIncome(String id) async {
     await _db.collection('incomes').doc(id).delete();
   }
