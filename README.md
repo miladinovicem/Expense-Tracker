@@ -6,13 +6,29 @@ A new Flutter project.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+# Expense Tracker (Flutter)
 
-A few resources to get you started if this is your first Flutter project:
+Mobile expense tracking application built with Flutter.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## Features
+- User authentication (Firebase Authentication)
+- Expense and income tracking (CRUD)
+- Balance overview with pie chart
+- REST API communication using Firebase Realtime Database
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Tech Stack
+- Flutter
+- Firebase Authentication
+- Firebase Realtime Database (REST API)
+- HTTP client
+
+## Architecture
+The mobile application communicates with Firebase Realtime Database exclusively through REST API calls.
+Firestore SDK is not used.
+Authentication is handled via Firebase Authentication, and ID tokens are attached to each REST request.
+
+## Screens
+- Login / Register
+- Balance dashboard
+- Expenses (add, edit, delete)
+- Incomes (add, edit, delete)
