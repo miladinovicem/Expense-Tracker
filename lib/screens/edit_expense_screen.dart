@@ -23,25 +23,35 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
   @override
   void initState() {
     super.initState();
-    _amountController = TextEditingController(
-      text: widget.expense.amount.toString(),
-    );
-    _categoryController = TextEditingController(text: widget.expense.category);
+    _amountController =
+        TextEditingController(text: widget.expense.amount.toString());
+    _categoryController =
+        TextEditingController(text: widget.expense.category);
     _selectedDate = widget.expense.date;
   }
 
+  @override
+  void dispose() {
+    _amountController.dispose();
+    _categoryController.dispose();
+    super.dispose();
+  }
+
   Future<void> _save() async {
+    final amount = double.tryParse(_amountController.text);
+    if (amount == null) return;
+
     setState(() => _isLoading = true);
 
     await _expenseService.updateExpense(
       id: widget.expense.id,
-      amount: double.parse(_amountController.text),
+      amount: amount,
       category: _categoryController.text.trim(),
       date: _selectedDate,
     );
 
     if (!mounted) return;
-    Navigator.pop(context);
+    Navigator.pop(context, true);
   }
 
   @override
@@ -63,7 +73,6 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
               decoration: const InputDecoration(labelText: 'Category'),
             ),
             const SizedBox(height: 12),
-
             ListTile(
               title: Text(
                 'Date: ${_selectedDate.toLocal().toString().split(' ')[0]}',
@@ -76,15 +85,12 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
                   firstDate: DateTime(2020),
                   lastDate: DateTime.now(),
                 );
-
                 if (picked != null) {
                   setState(() => _selectedDate = picked);
                 }
               },
             ),
-
             const SizedBox(height: 24),
-
             ElevatedButton(
               onPressed: _isLoading ? null : _save,
               child: _isLoading

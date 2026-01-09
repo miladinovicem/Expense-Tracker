@@ -1,37 +1,32 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'expense_service.dart';
+import 'income_service.dart';
 
 class BalanceService {
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final ExpenseService _expenseService = ExpenseService();
+  final IncomeService _incomeService = IncomeService();
 
   Future<double> getTotalExpenses() async {
-    final user = _auth.currentUser;
-    if (user == null) return 0.0;
+    final expenses = await _expenseService.getExpenses();
 
-    final snapshot = await _db
-        .collection('expenses')
-        .where('userId', isEqualTo: user.uid)
-        .get();
-
-    return snapshot.docs.fold<double>(
+    return expenses.fold<double>(
       0.0,
-      (sum, doc) => sum + (doc['amount'] as num).toDouble(),
+      (sum, e) => sum + e.amount,
     );
   }
 
   Future<double> getTotalIncome() async {
-    final user = _auth.currentUser;
-    if (user == null) return 0.0;
+    final incomes = await _incomeService.getIncomes();
 
-    final snapshot = await _db
-        .collection('incomes')
-        .where('userId', isEqualTo: user.uid)
-        .get();
-
-    return snapshot.docs.fold<double>(
+    return incomes.fold<double>(
       0.0,
-      (sum, doc) => sum + (doc['amount'] as num).toDouble(),
+      (sum, i) => sum + i.amount,
     );
+  }
+
+  Future<double> getBalance() async {
+    final income = await getTotalIncome();
+    final expenses = await getTotalExpenses();
+
+    return income - expenses;
   }
 }

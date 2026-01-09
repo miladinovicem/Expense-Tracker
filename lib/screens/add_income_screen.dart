@@ -16,6 +16,13 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
   bool _isLoading = false;
   String _error = '';
 
+  @override
+  void dispose() {
+    _amountController.dispose();
+    _sourceController.dispose();
+    super.dispose();
+  }
+
   Future<void> _saveIncome() async {
     final amount = double.tryParse(_amountController.text.trim());
 
@@ -42,11 +49,13 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
       );
 
       if (!mounted) return;
-      Navigator.pop(context);
+      Navigator.pop(context, true);
     } catch (e) {
       setState(() => _error = e.toString());
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -69,10 +78,8 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
               decoration: const InputDecoration(labelText: 'Source'),
             ),
             const SizedBox(height: 20),
-
             if (_error.isNotEmpty)
               Text(_error, style: const TextStyle(color: Colors.red)),
-
             ElevatedButton(
               onPressed: _isLoading ? null : _saveIncome,
               child: _isLoading

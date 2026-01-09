@@ -28,6 +28,8 @@ class _BalanceScreenState extends State<BalanceScreen> {
     final income = await _balanceService.getTotalIncome();
     final expenses = await _balanceService.getTotalExpenses();
 
+    if (!mounted) return;
+
     setState(() {
       _income = income;
       _expenses = expenses;
@@ -67,7 +69,7 @@ class _BalanceScreenState extends State<BalanceScreen> {
         ],
       ),
 
-      /// ✅ FIX: SCROLL
+      /// ✅ SCROLL FIX
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -79,8 +81,8 @@ class _BalanceScreenState extends State<BalanceScreen> {
                 chartType: ChartType.ring,
                 ringStrokeWidth: 32,
                 colorList: const [
-                  Color(0xFFD7CCC8), // expenses
-                  Color(0xFF6D4C41), // remaining
+                  Color(0xFFD7CCC8), // light brown - expenses
+                  Color(0xFF6D4C41), // dark brown - remaining
                 ],
                 legendOptions: LegendOptions(
                   legendPosition: LegendPosition.bottom,
@@ -96,26 +98,38 @@ class _BalanceScreenState extends State<BalanceScreen> {
 
               const SizedBox(height: 32),
 
-              /// 🔘 ACTION BUTTONS
+              /// 🔘 ACTION BUTTONS (SA REFRESH-OM)
               _ActionButton(
                 icon: Icons.add,
                 text: 'Add Expense',
-                onTap: () => Navigator.pushNamed(context, '/add-expense'),
+                onTap: () async {
+                  await Navigator.pushNamed(context, '/add-expense');
+                  _loadBalance();
+                },
               ),
               _ActionButton(
                 icon: Icons.list,
                 text: 'View Expenses',
-                onTap: () => Navigator.pushNamed(context, '/expenses'),
+                onTap: () async {
+                  await Navigator.pushNamed(context, '/expenses');
+                  _loadBalance();
+                },
               ),
               _ActionButton(
                 icon: Icons.add_circle_outline,
                 text: 'Add Income',
-                onTap: () => Navigator.pushNamed(context, '/add-income'),
+                onTap: () async {
+                  await Navigator.pushNamed(context, '/add-income');
+                  _loadBalance();
+                },
               ),
               _ActionButton(
                 icon: Icons.account_balance_wallet,
                 text: 'View Incomes',
-                onTap: () => Navigator.pushNamed(context, '/incomes'),
+                onTap: () async {
+                  await Navigator.pushNamed(context, '/incomes');
+                  _loadBalance();
+                },
               ),
             ],
           ),

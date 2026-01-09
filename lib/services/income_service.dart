@@ -1,10 +1,19 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/income.dart';
 
 class IncomeService {
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
+  static const String _baseUrl =
+      'https://expensetracker-126ef-default-rtdb.europe-west1.firebasedatabase.app';
+
   final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  Future<String?> _getToken() async {
+    final user = _auth.currentUser;
+    if (user == null) return null;
+    return await user.getIdToken();
+  }
 
   // CREATE
   Future<void> addIncome({
@@ -13,50 +22,80 @@ class IncomeService {
     required DateTime date,
   }) async {
     final user = _auth.currentUser;
-    if (user == null) return;
+    final token = await _getToken();
+    if (user == null || token == null) return;
 
-    await _db.collection('incomes').add({
-      'userId': user.uid,
-      'amount': amount,
-      'source': source,
-      'date': Timestamp.fromDate(date),
-      'createdAt': FieldValue.serverTimestamp(),
-    });
+    final url = Uri.parse(
+      '$_baseUrl/users/${user.uid}/incomes.json?auth=$token',
+    );
+
+    await http.post(
+      url,
+      body: jsonEncode({
+        'amount': amount,
+        'source': source,
+        'date': date.toIso8601String(),
+      }),
+    );
   }
 
   // READ
-  Stream<List<Income>> getIncomes() {
+  Future<List<Income>> getIncomes() async {
     final user = _auth.currentUser;
-    if (user == null) return const Stream.empty();
+    final token = await _getToken();
+    if (user == null || token == null) return [];
 
-    return _db
-        .collection('incomes')
-        .where('userId', isEqualTo: user.uid)
-        .orderBy('date', descending: true)
-        .snapshots()
-        .map(
-          (snapshot) => snapshot.docs
-              .map((doc) => Income.fromMap(doc.id, doc.data()))
-              .toList(),
-        );
+    final url = Uri.parse(
+      '$_baseUrl/users/${user.uid}/incomes.json?auth=$token',
+    );
+
+    final response = await http.get(url);
+
+    if (response.body == 'null') return [];
+
+    final Map<String, dynamic> data = jsonDecode(response.body);
+
+    return data.entries.map((e) {
+      return Income.fromMap(e.key, e.value);
+    }).toList()
+      ..sort((a, b) => b.date.compareTo(a.date));
   }
 
-  // DELETE
-  Future<void> deleteIncome(String id) async {
-    await _db.collection('incomes').doc(id).delete();
-  }
-
+  // UPDATE
   Future<void> updateIncome({
     required String id,
     required double amount,
     required String source,
     required DateTime date,
   }) async {
-    await _db.collection('incomes').doc(id).update({
-      'amount': amount,
-      'source': source,
-      'date': Timestamp.fromDate(DateTime(date.year, date.month, date.day, 12)),
-      'updatedAt': FieldValue.serverTimestamp(),
-    });
+    final user = _auth.currentUser;
+    final token = await _getToken();
+    if (user == null || token == null) return;
+
+    final url = Uri.parse(
+      '$_baseUrl/users/${user.uid}/incomes/$id.json?auth=$token',
+    );
+
+    await http.patch(
+      url,
+      body: jsonEncode({
+        'amount': amount,
+        'source': source,
+        'date': date.toIso8601String(),
+      }),
+    );
+  }
+
+  // DELETE
+  Future<void> deleteIncome(String id) async {
+    final user = _auth.currentUser;
+    final token = await _getToken();
+    if (user == null || token == null) return;
+
+    final url = Uri.parse(
+      '$_baseUrl/users/${user.uid}/incomes/$id.json?auth=$token',
+    );
+
+    await http.delete(url);
   }
 }

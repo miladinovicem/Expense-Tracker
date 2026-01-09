@@ -23,25 +23,35 @@ class _EditIncomeScreenState extends State<EditIncomeScreen> {
   @override
   void initState() {
     super.initState();
-    _amountController = TextEditingController(
-      text: widget.income.amount.toString(),
-    );
-    _sourceController = TextEditingController(text: widget.income.source);
+    _amountController =
+        TextEditingController(text: widget.income.amount.toString());
+    _sourceController =
+        TextEditingController(text: widget.income.source);
     _selectedDate = widget.income.date;
   }
 
+  @override
+  void dispose() {
+    _amountController.dispose();
+    _sourceController.dispose();
+    super.dispose();
+  }
+
   Future<void> _save() async {
+    final amount = double.tryParse(_amountController.text);
+    if (amount == null) return;
+
     setState(() => _isLoading = true);
 
     await _incomeService.updateIncome(
       id: widget.income.id,
-      amount: double.parse(_amountController.text),
+      amount: amount,
       source: _sourceController.text.trim(),
       date: _selectedDate,
     );
 
     if (!mounted) return;
-    Navigator.pop(context);
+    Navigator.pop(context, true);
   }
 
   @override
@@ -63,7 +73,6 @@ class _EditIncomeScreenState extends State<EditIncomeScreen> {
               decoration: const InputDecoration(labelText: 'Source'),
             ),
             const SizedBox(height: 12),
-
             ListTile(
               title: Text(
                 'Date: ${_selectedDate.toLocal().toString().split(' ')[0]}',
@@ -76,15 +85,12 @@ class _EditIncomeScreenState extends State<EditIncomeScreen> {
                   firstDate: DateTime(2020),
                   lastDate: DateTime.now(),
                 );
-
                 if (picked != null) {
                   setState(() => _selectedDate = picked);
                 }
               },
             ),
-
             const SizedBox(height: 24),
-
             ElevatedButton(
               onPressed: _isLoading ? null : _save,
               child: _isLoading

@@ -1,9 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   // REGISTRACIJA
   Future<User> registerWithEmailAndPassword({
@@ -18,22 +16,14 @@ class AuthService {
       password: password,
     );
 
-    final user = credential.user!;
-
-    // Snimi dodatne podatke u Firestore
-    await _db.collection('users').doc(user.uid).set({
-      'firstName': firstName,
-      'lastName': lastName,
-      'phone': phone,
-      'email': email,
-      'createdAt': FieldValue.serverTimestamp(),
-    });
-
-    return user; // ⬅ KLJUČNO
+    return credential.user!;
   }
 
   // LOGIN
-  Future<User> signInWithEmailAndPassword(String email, String password) async {
+  Future<User> signInWithEmailAndPassword(
+    String email,
+    String password,
+  ) async {
     final credential = await _auth.signInWithEmailAndPassword(
       email: email,
       password: password,
